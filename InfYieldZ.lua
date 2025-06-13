@@ -6913,202 +6913,103 @@ end)
 
 
 FLYING = false
-local FLY_KEY = Enum.KeyCode.F
-local BASE_SPEED = 50
-local BOOST_SPEED = 100
-local ROTATION_SPEED = 30
-local MOMENTUM_SMOOTHING = 0.85
-local FLY_ANIMATION_ID = "rbxassetid://3541044388"
-
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local ContextActionService = game:GetService("ContextActionService")
-
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
-
-local flyAnim = nil
-local flyBV = nil
-local flyBG = nil
-local currentSpeed = BASE_SPEED
-local currentVelocity = Vector3.new(0, 0, 0)
-
-local input = {
-    forward = 0,
-    backward = 0,
-    left = 0,
-    right = 0,
-    up = 0,
-    down = 0,
-    boost = 0
-}
-
-local function setupAnimation()
-    if not flyAnim then
-        flyAnim = Instance.new("Animation")
-        flyAnim.AnimationId = FLY_ANIMATION_ID
-        flyAnim = humanoid:LoadAnimation(flyAnim)
-    end
-end
-
-local function onShiftLock(actionName, inputState, inputObj)
-    shiftLock = inputState == Enum.UserInputState.Begin
-end
-
-local function enableFlight()
-    FLYING = true
-    humanoid.PlatformStand = true
-    
-    flyBV = Instance.new("BodyVelocity")
-    flyBV.Name = "FlyBV"
-    flyBV.Velocity = Vector3.new(0, 0, 0)
-    flyBV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    flyBV.P = 10000
-    flyBV.Parent = rootPart
-    
-    flyBG = Instance.new("BodyGyro")
-    flyBG.Name = "FlyBG"
-    flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    flyBG.P = 20000
-    flyBG.D = 1
-    flyBG.Parent = rootPart
-    
-    setupAnimation()
-    if flyAnim then flyAnim:Play() end
-end
-
-local function disableFlight()
-    FLYING = false
-    humanoid.PlatformStand = false
-    
-    if flyBV then flyBV:Destroy() end
-    if flyBG then flyBG:Destroy() end
-    
-    if flyAnim then flyAnim:Stop() end
-    
-    ContextActionService:UnbindAction("ShiftLockDetector")
-end
-
-local function toggleFlight()
-    if FLYING then
-        disableFlight()
-    else
-        enableFlight()
-    end
-end
-
-local function handleInput(inputObj, gameProcessed)
-    if gameProcessed then return end
-    
-    
-    if not FLYING then return end
-    
-    if inputObj.KeyCode == Enum.KeyCode.W then
-        input.forward = 1
-    elseif inputObj.KeyCode == Enum.KeyCode.S then
-        input.backward = 1
-    elseif inputObj.KeyCode == Enum.KeyCode.A then
-        input.left = 1
-    elseif inputObj.KeyCode == Enum.KeyCode.D then
-        input.right = 1
-    elseif inputObj.KeyCode == Enum.KeyCode.Space then
-        input.up = 1
-    elseif inputObj.KeyCode == Enum.KeyCode.LeftControl then
-        input.down = 1
-
-    end
-end
-
-local function handleInputEnd(inputObj)
-    if not FLYING then return end
-    
-    if inputObj.KeyCode == Enum.KeyCode.W then
-        input.forward = 0
-    elseif inputObj.KeyCode == Enum.KeyCode.S then
-        input.backward = 0
-    elseif inputObj.KeyCode == Enum.KeyCode.A then
-        input.left = 0
-    elseif inputObj.KeyCode == Enum.KeyCode.D then
-        input.right = 0
-    elseif inputObj.KeyCode == Enum.KeyCode.Space then
-        input.up = 0
-    elseif inputObj.KeyCode == Enum.KeyCode.LeftControl then
-        input.down = 0
-    end
-end
-
-local function calculateMovement()
-    if not FLYING or not flyBV then return Vector3.new(0, 0, 0) end
-    
-    local camera = workspace.CurrentCamera
-    local forward = camera.CFrame.LookVector * (input.forward - input.backward)
-    local right = camera.CFrame.RightVector * (input.right - input.left)
-    local up = Vector3.new(0, 1, 0) * (input.up - input.down)
-    
-    local targetDirection = (forward + right + up)
-    if targetDirection.Magnitude > 0 then
-        targetDirection = targetDirection.Unit
-    end
-    
-    local targetVelocity = targetDirection * currentSpeed
-    currentVelocity = targetVelocity -- ← snap instantly instead of smoothing
-    
-    return currentVelocity
-end
-
-local function updateRotation()
-    if not FLYING or not flyBG then return end
-    
-    local camera = workspace.CurrentCamera
-    
-    local lookVector = camera.CFrame.LookVector
-    flyBG.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
-end
-
-local flightConnection
-local function startFlightLoop()
-    if flightConnection then flightConnection:Disconnect() end
-    
-    flightConnection = RunService.Heartbeat:Connect(function()
-        if not FLYING or not rootPart or not humanoid or humanoid.Health <= 0 then
-            if FLYING then disableFlight() end
-            return
-        end
-        
-        flyBV.Velocity = calculateMovement()
-        updateRotation()
-    end)
-end
-
-UserInputService.InputBegan:Connect(handleInput)
-UserInputService.InputEnded:Connect(handleInputEnd)
-
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = character:WaitForChild("Humanoid")
-    rootPart = character:WaitForChild("HumanoidRootPart")
-    
-    if FLYING then 
-        disableFlight()
-        enableFlight()
-        startFlightLoop()
-    end
-end)
-
-startFlightLoop()
-
--- Compatibility with the original functions
+QEfly = true
+iyflyspeed = 1
+vehicleflyspeed = 1
 function sFLY(vfly)
-    enableFlight()
+	repeat wait() until Players.LocalPlayer and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	repeat wait() until IYMouse
+	if flyKeyDown or flyKeyUp then flyKeyDown:Disconnect() flyKeyUp:Disconnect() end
+
+	local T = getRoot(Players.LocalPlayer.Character)
+	local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+	local lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+	local SPEED = 0
+
+	local function FLY()
+		FLYING = true
+		local BG = Instance.new('BodyGyro')
+		local BV = Instance.new('BodyVelocity')
+		BG.P = 9e4
+		BG.Parent = T
+		BV.Parent = T
+		BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		BG.cframe = T.CFrame
+		BV.velocity = Vector3.new(0, 0, 0)
+		BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+		task.spawn(function()
+			repeat wait()
+				if not vfly and Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+					Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = true
+				end
+				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+					SPEED = 50
+				elseif not (CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0) and SPEED ~= 0 then
+					SPEED = 0
+				end
+				if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 or (CONTROL.Q + CONTROL.E) ~= 0 then
+					BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+					lCONTROL = {F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R}
+				elseif (CONTROL.L + CONTROL.R) == 0 and (CONTROL.F + CONTROL.B) == 0 and (CONTROL.Q + CONTROL.E) == 0 and SPEED ~= 0 then
+					BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+				else
+					BV.velocity = Vector3.new(0, 0, 0)
+				end
+				BG.cframe = CFrame.new(T.Position, T.Position + Vector3.new(workspace.CurrentCamera.CFrame.LookVector.X, 0, workspace.CurrentCamera.CFrame.LookVector.Z))
+
+			until not FLYING
+			CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+			lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+			SPEED = 0
+			BG:Destroy()
+			BV:Destroy()
+			if Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+				Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+			end
+		end)
+	end
+	flyKeyDown = IYMouse.KeyDown:Connect(function(KEY)
+		if KEY:lower() == 'w' then
+			CONTROL.F = (vfly and vehicleflyspeed or iyflyspeed)
+		elseif KEY:lower() == 's' then
+			CONTROL.B = - (vfly and vehicleflyspeed or iyflyspeed)
+		elseif KEY:lower() == 'a' then
+			CONTROL.L = - (vfly and vehicleflyspeed or iyflyspeed)
+		elseif KEY:lower() == 'd' then 
+			CONTROL.R = (vfly and vehicleflyspeed or iyflyspeed)
+		elseif QEfly and KEY:lower() == 'e' then
+			CONTROL.Q = (vfly and vehicleflyspeed or iyflyspeed)*2
+		elseif QEfly and KEY:lower() == 'q' then
+			CONTROL.E = -(vfly and vehicleflyspeed or iyflyspeed)*2
+		end
+		pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Track end)
+	end)
+	flyKeyUp = IYMouse.KeyUp:Connect(function(KEY)
+		if KEY:lower() == 'w' then
+			CONTROL.F = 0
+		elseif KEY:lower() == 's' then
+			CONTROL.B = 0
+		elseif KEY:lower() == 'a' then
+			CONTROL.L = 0
+		elseif KEY:lower() == 'd' then
+			CONTROL.R = 0
+		elseif KEY:lower() == 'e' then
+			CONTROL.Q = 0
+		elseif KEY:lower() == 'q' then
+			CONTROL.E = 0
+		end
+	end)
+	FLY()
 end
 
 function NOFLY()
-    disableFlight()
+	FLYING = false
+	if flyKeyDown or flyKeyUp then flyKeyDown:Disconnect() flyKeyUp:Disconnect() end
+	if Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
+		Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+	end
+	pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Custom end)
 end
-
 
 local velocityHandlerName = randomString()
 local gyroHandlerName = randomString()
