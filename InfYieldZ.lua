@@ -6972,7 +6972,7 @@ local function enableFlight()
     flyBG.Name = "FlyBG"
     flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     flyBG.P = 20000
-    flyBG.D = 1000
+    flyBG.D = 0
     flyBG.Parent = rootPart
     
     setupAnimation()
@@ -6988,7 +6988,6 @@ local function disableFlight()
     
     if flyAnim then flyAnim:Stop() end
     
-    ContextActionService:UnbindAction("ShiftLockDetector")
 end
 
 local function toggleFlight()
