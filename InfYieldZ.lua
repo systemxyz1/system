@@ -17,7 +17,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "0.0.3"
+currentVersion = "0.0.31"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -6911,6 +6911,7 @@ addcmd('togglenoclip',{},function(args, speaker)
 	end
 end)
 
+
 FLYING = false
 local FLY_KEY = Enum.KeyCode.F
 local BASE_SPEED = 50
@@ -6971,8 +6972,8 @@ local function enableFlight()
     flyBG = Instance.new("BodyGyro")
     flyBG.Name = "FlyBG"
     flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    flyBG.P = 1500
-    flyBG.D = 0
+    flyBG.P = 20000
+    flyBG.D = 1
     flyBG.Parent = rootPart
     
     setupAnimation()
@@ -6988,6 +6989,7 @@ local function disableFlight()
     
     if flyAnim then flyAnim:Stop() end
     
+    ContextActionService:UnbindAction("ShiftLockDetector")
 end
 
 local function toggleFlight()
@@ -7052,8 +7054,7 @@ local function calculateMovement()
     end
     
     local targetVelocity = targetDirection * currentSpeed
-   currentVelocity = currentVelocity:Lerp(targetVelocity, 0.01)
-
+    currentVelocity = targetVelocity -- ← snap instantly instead of smoothing
     
     return currentVelocity
 end
@@ -7064,9 +7065,7 @@ local function updateRotation()
     local camera = workspace.CurrentCamera
     
     local lookVector = camera.CFrame.LookVector
-   flyBG.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
-
-
+    flyBG.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
 end
 
 local flightConnection
