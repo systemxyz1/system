@@ -6932,7 +6932,6 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 local flyAnim = nil
 local flyBV = nil
 local flyBG = nil
-local shiftLock = false
 local currentSpeed = BASE_SPEED
 local currentVelocity = Vector3.new(0, 0, 0)
 
@@ -6978,8 +6977,6 @@ local function enableFlight()
     
     setupAnimation()
     if flyAnim then flyAnim:Play() end
-    
-    ContextActionService:BindAction("ShiftLockDetector", onShiftLock, false, Enum.KeyCode.LeftShift)
 end
 
 local function disableFlight()
@@ -7020,9 +7017,7 @@ local function handleInput(inputObj, gameProcessed)
         input.up = 1
     elseif inputObj.KeyCode == Enum.KeyCode.LeftControl then
         input.down = 1
-    elseif inputObj.KeyCode == Enum.KeyCode.LeftShift then
-        input.boost = 1
-        currentSpeed = BOOST_SPEED
+
     end
 end
 
@@ -7041,9 +7036,6 @@ local function handleInputEnd(inputObj)
         input.up = 0
     elseif inputObj.KeyCode == Enum.KeyCode.LeftControl then
         input.down = 0
-    elseif inputObj.KeyCode == Enum.KeyCode.LeftShift then
-        input.boost = 0
-        currentSpeed = BASE_SPEED
     end
 end
 
@@ -7061,7 +7053,8 @@ local function calculateMovement()
     end
     
     local targetVelocity = targetDirection * currentSpeed
-    currentVelocity = currentVelocity:Lerp(targetVelocity, 1 - MOMENTUM_SMOOTHING)
+   currentVelocity = targetVelocity
+
     
     return currentVelocity
 end
@@ -7071,12 +7064,8 @@ local function updateRotation()
     
     local camera = workspace.CurrentCamera
     
-    if shiftLock then
-        local lookVector = camera.CFrame.LookVector
-        flyBG.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
-    else
-        flyBG.CFrame = CFrame.new(rootPart.Position) * (camera.CFrame - camera.CFrame.Position)
-    end
+    local lookVector = camera.CFrame.LookVector
+    flyBG.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
 end
 
 local flightConnection
