@@ -17,7 +17,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "0.0.31"
+currentVersion = "0.0.32"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -6971,7 +6971,7 @@ local function enableFlight()
     flyBG = Instance.new("BodyGyro")
     flyBG.Name = "FlyBG"
     flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    flyBG.P = 20000
+    flyBG.P = 1e9
     flyBG.D = 0
     flyBG.Parent = rootPart
     
@@ -7064,7 +7064,8 @@ local function updateRotation()
     local camera = workspace.CurrentCamera
     
     local lookVector = camera.CFrame.LookVector
-    flyBG.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
+    flyBG.CFrame = CFrame.lookAt(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
+
 end
 
 local flightConnection
