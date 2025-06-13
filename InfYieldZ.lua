@@ -6971,7 +6971,7 @@ local function enableFlight()
     flyBG = Instance.new("BodyGyro")
     flyBG.Name = "FlyBG"
     flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    flyBG.P = 1e9
+    flyBG.P = 20000
     flyBG.D = 0
     flyBG.Parent = rootPart
     
