@@ -17,7 +17,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "0.0.34"
+currentVersion = "0.0.3"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -6972,7 +6972,7 @@ local function enableFlight()
     flyBG.Name = "FlyBG"
     flyBG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     flyBG.P = 1000
-    flyBG.D = 50
+    flyBG.D = 0.5
     flyBG.Parent = rootPart
     
     setupAnimation()
