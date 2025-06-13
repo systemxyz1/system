@@ -7052,7 +7052,7 @@ local function calculateMovement()
     end
     
     local targetVelocity = targetDirection * currentSpeed
-   currentVelocity = targetVelocity
+   currentVelocity = currentVelocity:Lerp(targetVelocity, 0.01)
 
     
     return currentVelocity
